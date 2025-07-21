@@ -1,4 +1,4 @@
-#include <costmap_converter/costmap_to_dynamic_obstacles/blob_detector.h>
+#include <d2_costmap_converter/costmap_to_dynamic_obstacles/blob_detector.h>
 #include <opencv2/opencv.hpp>
 #include <iostream>
 

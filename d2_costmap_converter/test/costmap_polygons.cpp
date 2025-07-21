@@ -2,7 +2,7 @@
 #include <memory>
 #include <gtest/gtest.h>
 
-#include <costmap_converter/costmap_to_polygons.h>
+#include <d2_costmap_converter/costmap_to_polygons.h>
 
 namespace {
 geometry_msgs::msg::Point32 create_point(double x, double y)
@@ -16,16 +16,16 @@ geometry_msgs::msg::Point32 create_point(double x, double y)
 } // end namespace
 
 // make things accesible in the test
-class CostmapToPolygons : public costmap_converter::CostmapToPolygonsDBSMCCH
+class CostmapToPolygons : public d2_costmap_converter::CostmapToPolygonsDBSMCCH
 {
   public:
-    const std::vector<costmap_converter::CostmapToPolygonsDBSMCCH::KeyPoint>& points() const {return occupied_cells_;}
-    costmap_converter::CostmapToPolygonsDBSMCCH::Parameters& parameters() {return parameter_;}
-    using costmap_converter::CostmapToPolygonsDBSMCCH::addPoint;
-    using costmap_converter::CostmapToPolygonsDBSMCCH::regionQuery;
-    using costmap_converter::CostmapToPolygonsDBSMCCH::dbScan;
-    using costmap_converter::CostmapToPolygonsDBSMCCH::convexHull2;
-    using costmap_converter::CostmapToPolygonsDBSMCCH::simplifyPolygon;
+    const std::vector<d2_costmap_converter::CostmapToPolygonsDBSMCCH::KeyPoint>& points() const {return occupied_cells_;}
+    d2_costmap_converter::CostmapToPolygonsDBSMCCH::Parameters& parameters() {return parameter_;}
+    using d2_costmap_converter::CostmapToPolygonsDBSMCCH::addPoint;
+    using d2_costmap_converter::CostmapToPolygonsDBSMCCH::regionQuery;
+    using d2_costmap_converter::CostmapToPolygonsDBSMCCH::dbScan;
+    using d2_costmap_converter::CostmapToPolygonsDBSMCCH::convexHull2;
+    using d2_costmap_converter::CostmapToPolygonsDBSMCCH::simplifyPolygon;
 };
 
 class CostmapToPolygonsDBSMCCHTest : public ::testing::Test
@@ -119,7 +119,7 @@ TEST_F(CostmapToPolygonsDBSMCCHTest, regionQuery)
 
 TEST_F(CostmapToPolygonsDBSMCCHTest, dbScan)
 {
-  std::vector< std::vector<costmap_converter::CostmapToPolygonsDBSMCCH::KeyPoint> > clusters;
+  std::vector< std::vector<d2_costmap_converter::CostmapToPolygonsDBSMCCH::KeyPoint> > clusters;
   costmap_to_polygons.dbScan(clusters);
   
   ASSERT_EQ(3, clusters.size());
@@ -135,7 +135,7 @@ TEST(CostmapToPolygonsDBSMCCH, EmptyMap)
   CostmapToPolygons costmap_to_polygons;
   costmap_to_polygons.setCostmap2D(costmap.get());
 
-  std::vector< std::vector<costmap_converter::CostmapToPolygonsDBSMCCH::KeyPoint> > clusters;
+  std::vector< std::vector<d2_costmap_converter::CostmapToPolygonsDBSMCCH::KeyPoint> > clusters;
   costmap_to_polygons.dbScan(clusters);
   ASSERT_EQ(1, clusters.size());    // noise cluster exists
   ASSERT_EQ(0, clusters[0].size()); // noise clsuter is empty
