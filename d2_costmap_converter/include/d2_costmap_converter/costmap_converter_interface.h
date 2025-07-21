@@ -36,8 +36,8 @@
  * Author: Christoph Rösmann, Otniel Rinaldo
  *********************************************************************/
 
-#ifndef COSTMAP_CONVERTER_INTERFACE_H_
-#define COSTMAP_CONVERTER_INTERFACE_H_
+#ifndef D2_COSTMAP_CONVERTER_INTERFACE_H_
+#define D2_COSTMAP_CONVERTER_INTERFACE_H_
 
 //#include <costmap_2d/costmap_2d_ros.h>
 #include <mutex>
@@ -48,15 +48,15 @@
 #include <nav2_costmap_2d/costmap_2d.hpp>
 #include <nav2_costmap_2d/costmap_2d_ros.hpp>
 #include <geometry_msgs/msg/polygon.hpp>
-#include <costmap_converter_msgs/msg/obstacle_array_msg.hpp>
+#include <d2_costmap_converter_msgs/msg/obstacle_array_msg.hpp>
 
-namespace costmap_converter
+namespace d2_costmap_converter
 {
   
 //! Typedef for a shared dynamic obstacle container
-typedef costmap_converter_msgs::msg::ObstacleArrayMsg::SharedPtr ObstacleArrayPtr;
+typedef d2_costmap_converter_msgs::msg::ObstacleArrayMsg::SharedPtr ObstacleArrayPtr;
 //! Typedef for a shared dynamic obstacle container (read-only access)
-typedef costmap_converter_msgs::msg::ObstacleArrayMsg::ConstSharedPtr ObstacleArrayConstPtr;
+typedef d2_costmap_converter_msgs::msg::ObstacleArrayMsg::ConstSharedPtr ObstacleArrayConstPtr;
 
 //! Typedef for a shared polygon container 
 typedef std::shared_ptr<std::vector<geometry_msgs::msg::Polygon>> PolygonContainerPtr;
@@ -138,7 +138,7 @@ public:
    */
     virtual ObstacleArrayConstPtr getObstacles()
     {
-      ObstacleArrayPtr obstacles = std::make_shared<costmap_converter_msgs::msg::ObstacleArrayMsg>();
+      ObstacleArrayPtr obstacles = std::make_shared<d2_costmap_converter_msgs::msg::ObstacleArrayMsg>();
       PolygonContainerConstPtr polygons = getPolygons();
       if (polygons)
       {
@@ -194,7 +194,7 @@ public:
       
       if (spin_thread)
       {
-        RCLCPP_DEBUG(nh_->get_logger(), "costmap_converter", "Spinning up a thread for the CostmapToPolygons plugin");
+        RCLCPP_DEBUG(nh_->get_logger(), "d2_costmap_converter", "Spinning up a thread for the CostmapToPolygons plugin");
         need_to_terminate_ = false;
         
         worker_timer_ = nh_->create_wall_timer(
@@ -294,7 +294,7 @@ public:
   /**
    * @brief Load underlying static costmap conversion plugin via plugin-loader
    * @param plugin_name Exact class name of the plugin to be loaded, e.g.
-   *                    costmap_converter::CostmapToPolygonsDBSMCCH
+   *                    d2_costmap_converter::CostmapToPolygonsDBSMCCH
    * @param nh_parent   NodeHandle which is extended by the namespace of the static conversion plugin
    */
   void loadStaticCostmapConverterPlugin(const std::string& plugin_name, rclcpp::Node::SharedPtr nh_parent)
@@ -372,7 +372,7 @@ protected:
   /**
    * @brief Protected constructor that should be called by subclasses
    */
-  BaseCostmapToDynamicObstacles() : static_converter_loader_("costmap_converter", "costmap_converter::BaseCostmapToPolygons"), static_costmap_converter_() {}
+  BaseCostmapToDynamicObstacles() : static_converter_loader_("d2_costmap_converter", "d2_costmap_converter::BaseCostmapToPolygons"), static_costmap_converter_() {}
 
 private:
   pluginlib::ClassLoader<BaseCostmapToPolygons> static_converter_loader_;
@@ -384,4 +384,4 @@ private:
 
 
 
-#endif // end COSTMAP_CONVERTER_INTERFACE_H_
+#endif // end D2_COSTMAP_CONVERTER_INTERFACE_H_
