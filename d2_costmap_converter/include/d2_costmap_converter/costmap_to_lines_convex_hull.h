@@ -36,16 +36,13 @@
  * Author: Christoph Rösmann, Otniel Rinaldo
  *********************************************************************/
 
-#ifndef COSTMAP_TO_LINES_CONVEX_HULL_H_
-#define COSTMAP_TO_LINES_CONVEX_HULL_H_
+#ifndef D2_COSTMAP_TO_LINES_CONVEX_HULL_H_
+#define D2_COSTMAP_TO_LINES_CONVEX_HULL_H_
 
-#include <costmap_converter/costmap_converter_interface.h>
-#include <costmap_converter/costmap_to_polygons.h>
+#include <d2_costmap_converter/costmap_converter_interface.h>
+#include <d2_costmap_converter/costmap_to_polygons.h>
 
-// dynamic reconfigure
-//#include <costmap_converter/CostmapToLinesDBSMCCHConfig.h>
-
-namespace costmap_converter
+namespace d2_costmap_converter
 {
   
 /**
@@ -134,4 +131,4 @@ namespace costmap_converter
   
 } //end namespace teb_local_planner
 
-#endif /* COSTMAP_TO_LINES_CONVEX_HULL_H_ */
+#endif /* D2_COSTMAP_TO_LINES_CONVEX_HULL_H_ */

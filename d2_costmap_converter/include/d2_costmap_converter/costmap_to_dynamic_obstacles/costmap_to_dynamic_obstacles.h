@@ -44,29 +44,24 @@
 #define COSTMAP_TO_DYNAMIC_OBSTACLES_H_
 
 // ROS
-#include <costmap_converter/costmap_converter_interface.h>
+#include <d2_costmap_converter/costmap_converter_interface.h>
 #include <nav_msgs/msg/odometry.hpp>
-#include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 // OpenCV
-#include <cv_bridge/cv_bridge.hpp>
+#include <cv_bridge/cv_bridge.h>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/video/tracking.hpp>
 
-// dynamic reconfigure
-//#include <costmap_converter/CostmapToDynamicObstaclesConfig.h>
-//#include <dynamic_reconfigure/server.h>
-
 // Own includes
-#include <costmap_converter/costmap_to_dynamic_obstacles/multitarget_tracker/Ctracker.h>
-#include <costmap_converter/costmap_to_dynamic_obstacles/background_subtractor.h>
-#include <costmap_converter/costmap_to_dynamic_obstacles/blob_detector.h>
+#include <d2_costmap_converter/costmap_to_dynamic_obstacles/multitarget_tracker/Ctracker.h>
+#include <d2_costmap_converter/costmap_to_dynamic_obstacles/background_subtractor.h>
+#include <d2_costmap_converter/costmap_to_dynamic_obstacles/blob_detector.h>
 
 // STL
 #include <memory>
 
-namespace costmap_converter {
+namespace d2_costmap_converter {
 
 /**
  * @class CostmapToDynamicObstacles
@@ -207,6 +202,6 @@ private:
 //  void reconfigureCB(CostmapToDynamicObstaclesConfig &config, uint32_t level);
 };
 
-} // end namespace costmap_converter
+} // end namespace d2_costmap_converter
 
 #endif /* COSTMAP_TO_DYNAMIC_OBSTACLES_H_ */

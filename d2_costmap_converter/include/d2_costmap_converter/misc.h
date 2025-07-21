@@ -42,7 +42,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace costmap_converter
+namespace d2_costmap_converter
 {
 
 /**

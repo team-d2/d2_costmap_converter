@@ -36,18 +36,14 @@
  * Author: Christoph Rösmann
  *********************************************************************/
 
-#ifndef COSTMAP_TO_POLYGONS_CONCAVE_H_
-#define COSTMAP_TO_POLYGONS_CONCAVE_H_
+#ifndef D2_COSTMAP_TO_POLYGONS_CONCAVE_H_
+#define D2_COSTMAP_TO_POLYGONS_CONCAVE_H_
 
-#include <costmap_converter/costmap_to_polygons.h>
-#include <costmap_converter/misc.h>
-
-// dynamic reconfigure
-//#include <costmap_converter/CostmapToPolygonsDBSConcaveHullConfig.h>
-//#include <dynamic_reconfigure/server.h>
+#include <d2_costmap_converter/costmap_to_polygons.h>
+#include <d2_costmap_converter/misc.h>
 
 
-namespace costmap_converter
+namespace d2_costmap_converter
 {
   
 /**
@@ -199,4 +195,4 @@ bool CostmapToPolygonsDBSConcaveHull::checkLineIntersection(const std::vector<Po
   
 } //end namespace teb_local_planner
 
-#endif /* COSTMAP_TO_POLYGONS_CONCAVE_H_ */
+#endif /* D2_COSTMAP_TO_POLYGONS_CONCAVE_H_ */

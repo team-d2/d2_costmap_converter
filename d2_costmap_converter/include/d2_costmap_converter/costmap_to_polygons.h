@@ -40,7 +40,7 @@
 #define COSTMAP_TO_POLYGONS_H_
 
 #include <rclcpp/rclcpp.hpp>
-#include <costmap_converter/costmap_converter_interface.h>
+#include <d2_costmap_converter/costmap_converter_interface.h>
 #include <nav_msgs/msg/occupancy_grid.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 #include <geometry_msgs/msg/point.hpp>
@@ -51,12 +51,8 @@
 #include <Eigen/Core>
 #include <Eigen/StdVector>
 
-// dynamic reconfigure
-//#include <costmap_converter/CostmapToPolygonsDBSMCCHConfig.h>
-//#include <dynamic_reconfigure/server.h>
 
-
-namespace costmap_converter
+namespace d2_costmap_converter
 {
   
 /**
@@ -332,4 +328,4 @@ class CostmapToPolygonsDBSMCCH : public BaseCostmapToPolygons
   
 } //end namespace teb_local_planner
 
-#endif /* COSTMAP_TO_POLYGONS_H_ */
+#endif /* D2_COSTMAP_TO_POLYGONS_H_ */

@@ -36,18 +36,18 @@
  * Author: Christoph Rösmann
  *********************************************************************/
 
-#ifndef COSTMAP_TO_LINES_RANSAC_H_
-#define COSTMAP_TO_LINES_RANSAC_H_
+#ifndef D2_COSTMAP_TO_LINES_RANSAC_H_
+#define D2_COSTMAP_TO_LINES_RANSAC_H_
 
-#include <costmap_converter/costmap_converter_interface.h>
-#include <costmap_converter/costmap_to_polygons.h>
-#include <costmap_converter/misc.h>
+#include <d2_costmap_converter/costmap_converter_interface.h>
+#include <d2_costmap_converter/costmap_to_polygons.h>
+#include <d2_costmap_converter/misc.h>
 
 #include <random>
 
 //#include <costmap_converter/CostmapToLinesDBSRANSACConfig.h>
 
-namespace costmap_converter
+namespace d2_costmap_converter
 {
   
 /**
@@ -184,4 +184,4 @@ bool CostmapToLinesDBSRANSAC::isInlier(const Point& point, const LinePoint& line
   
 } //end namespace teb_local_planner
 
-#endif /* COSTMAP_TO_LINES_RANSAC_H_ */
+#endif /* D2_COSTMAP_TO_LINES_RANSAC_H_ */
