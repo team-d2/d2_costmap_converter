@@ -36,13 +36,13 @@
  * Author: Christoph Rösmann, Otniel Rinaldo
  *********************************************************************/
 
-#include <costmap_converter/costmap_to_polygons_concave.h>
+#include <d2_costmap_converter/costmap_to_polygons_concave.h>
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(costmap_converter::CostmapToPolygonsDBSConcaveHull, costmap_converter::BaseCostmapToPolygons)
+PLUGINLIB_EXPORT_CLASS(d2_costmap_converter::CostmapToPolygonsDBSConcaveHull, d2_costmap_converter::BaseCostmapToPolygons)
 
-namespace costmap_converter
+namespace d2_costmap_converter
 {
     
 CostmapToPolygonsDBSConcaveHull::CostmapToPolygonsDBSConcaveHull() : CostmapToPolygonsDBSMCCH()
@@ -226,6 +226,6 @@ void CostmapToPolygonsDBSConcaveHull::concaveHullClusterCut(std::vector<KeyPoint
 //    concave_hull_depth_ = config.concave_hull_depth;
 //}
 
-}//end namespace costmap_converter
+}//end namespace d2_costmap_converter
 
 

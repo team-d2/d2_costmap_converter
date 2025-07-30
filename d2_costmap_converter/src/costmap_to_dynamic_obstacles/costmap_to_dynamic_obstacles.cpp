@@ -1,13 +1,13 @@
-#include <costmap_converter/costmap_to_dynamic_obstacles/costmap_to_dynamic_obstacles.h>
+#include <d2_costmap_converter/costmap_to_dynamic_obstacles/costmap_to_dynamic_obstacles.h>
 
 #include <pluginlib/class_list_macros.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Vector3.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-PLUGINLIB_EXPORT_CLASS(costmap_converter::CostmapToDynamicObstacles, costmap_converter::BaseCostmapToPolygons)
+PLUGINLIB_EXPORT_CLASS(d2_costmap_converter::CostmapToDynamicObstacles, d2_costmap_converter::BaseCostmapToPolygons)
 
-namespace costmap_converter
+namespace d2_costmap_converter
 {
 
 CostmapToDynamicObstacles::CostmapToDynamicObstacles() : BaseCostmapToDynamicObstacles()
@@ -137,7 +137,7 @@ void CostmapToDynamicObstacles::initialize(rclcpp::Node::SharedPtr nh)
 
   ////////////////////////////////////
   // Static costmap conversion parameters
-  std::string static_converter_plugin = "costmap_converter::CostmapToPolygonsDBSMCCH";
+  std::string static_converter_plugin = "d2_costmap_converter::CostmapToPolygonsDBSMCCH";
   nh->get_parameter_or<std::string>("static_converter_plugin", static_converter_plugin, static_converter_plugin);
   loadStaticCostmapConverterPlugin(static_converter_plugin, nh);
 
@@ -210,7 +210,7 @@ void CostmapToDynamicObstacles::compute()
   */
 
   //////////////////////////// Fill ObstacleContainerPtr /////////////////////////////
-  ObstacleArrayPtr obstacles(new costmap_converter_msgs::msg::ObstacleArrayMsg);
+  ObstacleArrayPtr obstacles(new d2_costmap_converter_msgs::msg::ObstacleArrayMsg);
   // header.seq is automatically filled
   obstacles->header.stamp = now();
   obstacles->header.frame_id = "/map"; //Global frame /map

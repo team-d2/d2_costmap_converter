@@ -44,15 +44,15 @@
 #include <nav_msgs/msg/occupancy_grid.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 
-#include <costmap_converter/costmap_converter_interface.h>
+#include <d2_costmap_converter/costmap_converter_interface.h>
 #include <pluginlib/class_loader.hpp>
 
 class CostmapStandaloneConversion : public rclcpp::Node {
  public:
   CostmapStandaloneConversion(const std::string node_name)
       : rclcpp::Node(node_name),
-        converter_loader_("costmap_converter",
-                          "costmap_converter::BaseCostmapToPolygons") {
+        converter_loader_("d2_costmap_converter",
+                          "d2_costmap_converter::BaseCostmapToPolygons") {
     costmap_ros_ =
         std::make_shared<nav2_costmap_2d::Costmap2DROS>("converter_costmap");
     costmap_thread_ = std::make_unique<std::thread>(
@@ -68,7 +68,7 @@ class CostmapStandaloneConversion : public rclcpp::Node {
     // load converter plugin from parameter server, otherwise set default
 
     std::string converter_plugin =
-        "costmap_converter::CostmapToPolygonsDBSMCCH";
+        "d2_costmap_converter::CostmapToPolygonsDBSMCCH";
 
     declare_parameter("converter_plugin",
                       rclcpp::ParameterValue(converter_plugin));
@@ -102,7 +102,7 @@ class CostmapStandaloneConversion : public rclcpp::Node {
                                   polygon_marker_topic);
 
     obstacle_pub_ =
-        create_publisher<costmap_converter_msgs::msg::ObstacleArrayMsg>(
+        create_publisher<d2_costmap_converter_msgs::msg::ObstacleArrayMsg>(
             obstacles_topic, 1000);
     marker_pub_ = create_publisher<visualization_msgs::msg::Marker>(
         polygon_marker_topic, 10);
@@ -120,7 +120,7 @@ class CostmapStandaloneConversion : public rclcpp::Node {
     if (converter_) {
       converter_->setOdomTopic(odom_topic);
       converter_->initialize(
-          std::make_shared<rclcpp::Node>("intra_node", "costmap_converter"));
+          std::make_shared<rclcpp::Node>("intra_node", "d2_costmap_converter"));
       converter_->startWorker(std::make_shared<rclcpp::Rate>(5),
                               costmap_ros_->getCostmap(), true);
     }
@@ -131,7 +131,7 @@ class CostmapStandaloneConversion : public rclcpp::Node {
   }
 
   void publishCallback() {
-    costmap_converter::ObstacleArrayConstPtr obstacles =
+    d2_costmap_converter::ObstacleArrayConstPtr obstacles =
         converter_->getObstacles();
 
     if (!obstacles) return;
@@ -192,7 +192,7 @@ class CostmapStandaloneConversion : public rclcpp::Node {
 
   void publishAsMarker(
       const std::string &frame_id,
-      const costmap_converter_msgs::msg::ObstacleArrayMsg &obstacles) {
+      const d2_costmap_converter_msgs::msg::ObstacleArrayMsg &obstacles) {
     visualization_msgs::msg::Marker line_list;
     line_list.header.frame_id = frame_id;
     line_list.header.stamp = now();
@@ -237,14 +237,14 @@ class CostmapStandaloneConversion : public rclcpp::Node {
   }
 
  private:
-  pluginlib::ClassLoader<costmap_converter::BaseCostmapToPolygons>
+  pluginlib::ClassLoader<d2_costmap_converter::BaseCostmapToPolygons>
       converter_loader_;
-  std::shared_ptr<costmap_converter::BaseCostmapToPolygons> converter_;
+  std::shared_ptr<d2_costmap_converter::BaseCostmapToPolygons> converter_;
 
   rclcpp::Node::SharedPtr n_;
   std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros_;
   std::unique_ptr<std::thread> costmap_thread_;
-  rclcpp::Publisher<costmap_converter_msgs::msg::ObstacleArrayMsg>::SharedPtr
+  rclcpp::Publisher<d2_costmap_converter_msgs::msg::ObstacleArrayMsg>::SharedPtr
       obstacle_pub_;
   rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
   rclcpp::TimerBase::SharedPtr pub_timer_;
@@ -257,7 +257,7 @@ int main(int argc, char **argv) {
   rclcpp::init(argc, argv);
 
   auto convert_process =
-      std::make_shared<CostmapStandaloneConversion>("costmap_converter");
+      std::make_shared<CostmapStandaloneConversion>("d2_costmap_converter");
 
   rclcpp::spin(convert_process);
 

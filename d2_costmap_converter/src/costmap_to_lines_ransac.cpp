@@ -36,12 +36,12 @@
  * Author: Christoph Rösmann
  *********************************************************************/
 
-#include <costmap_converter/costmap_to_lines_ransac.h>
+#include <d2_costmap_converter/costmap_to_lines_ransac.h>
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(costmap_converter::CostmapToLinesDBSRANSAC, costmap_converter::BaseCostmapToPolygons)
+PLUGINLIB_EXPORT_CLASS(d2_costmap_converter::CostmapToLinesDBSRANSAC, d2_costmap_converter::BaseCostmapToPolygons)
 
-namespace costmap_converter
+namespace d2_costmap_converter
 {
 
 CostmapToLinesDBSRANSAC::CostmapToLinesDBSRANSAC() : CostmapToPolygonsDBSMCCH() 
@@ -356,6 +356,6 @@ void CostmapToLinesDBSRANSAC::adjustLineLength(const std::vector<KeyPoint>& data
 }*/
 
 
-}//end namespace costmap_converter
+}//end namespace d2_costmap_converter
 
 

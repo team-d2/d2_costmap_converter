@@ -36,11 +36,11 @@
  * Author: Christoph Rösmann, Otniel Rinaldo
  *********************************************************************/
 
-#include <costmap_converter/costmap_to_polygons.h>
-#include <costmap_converter/misc.h>
+#include <d2_costmap_converter/costmap_to_polygons.h>
+#include <d2_costmap_converter/misc.h>
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(costmap_converter::CostmapToPolygonsDBSMCCH, costmap_converter::BaseCostmapToPolygons)
+PLUGINLIB_EXPORT_CLASS(d2_costmap_converter::CostmapToPolygonsDBSMCCH, d2_costmap_converter::BaseCostmapToPolygons)
 
 namespace
 {
@@ -69,7 +69,7 @@ std::vector<geometry_msgs::msg::Point32> douglasPeucker(std::vector<geometry_msg
   std::vector<geometry_msgs::msg::Point32>::iterator last = std::prev(end);
   for (auto it = std::next(begin); it != last; ++it)
   {
-    double d = costmap_converter::computeSquaredDistanceToLineSegment(*it, *begin, *last);
+    double d = d2_costmap_converter::computeSquaredDistanceToLineSegment(*it, *begin, *last);
     if (d > dmax)
     {
       max_dist_it = it;
@@ -99,7 +99,7 @@ std::vector<geometry_msgs::msg::Point32> douglasPeucker(std::vector<geometry_msg
 
 } // end namespace
 
-namespace costmap_converter
+namespace d2_costmap_converter
 {
 
 CostmapToPolygonsDBSMCCH::CostmapToPolygonsDBSMCCH() : BaseCostmapToPolygons()
@@ -506,6 +506,6 @@ PolygonContainerConstPtr CostmapToPolygonsDBSMCCH::getPolygons()
   //parameter_buffered_.min_keypoint_separation_ = config.convex_hull_min_pt_separation;
 //}
 
-}//end namespace costmap_converter
+}//end namespace d2_costmap_converter
 
 

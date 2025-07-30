@@ -36,13 +36,13 @@
  * Author: Christoph Rösmann, Otniel Rinaldo
  *********************************************************************/
 
-#include <costmap_converter/costmap_to_lines_convex_hull.h>
-#include <costmap_converter/misc.h>
+#include <d2_costmap_converter/costmap_to_lines_convex_hull.h>
+#include <d2_costmap_converter/misc.h>
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(costmap_converter::CostmapToLinesDBSMCCH, costmap_converter::BaseCostmapToPolygons)
+PLUGINLIB_EXPORT_CLASS(d2_costmap_converter::CostmapToLinesDBSMCCH, d2_costmap_converter::BaseCostmapToPolygons)
 
-namespace costmap_converter
+namespace d2_costmap_converter
 {
 
 CostmapToLinesDBSMCCH::CostmapToLinesDBSMCCH() : CostmapToPolygonsDBSMCCH() 
@@ -298,6 +298,6 @@ void CostmapToLinesDBSMCCH::extractPointsAndLines(std::vector<KeyPoint>& cluster
 
 
 
-}//end namespace costmap_converter
+}//end namespace d2_costmap_converter
 
 
