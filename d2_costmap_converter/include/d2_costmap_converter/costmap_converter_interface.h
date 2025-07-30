@@ -189,25 +189,25 @@ public:
           need_to_terminate_ = true;
         }
         spin_thread_->join();
-        delete spin_thread_;
+        spin_thread_.reset();
       }
       
       if (spin_thread)
       {
-        RCLCPP_DEBUG(nh_->get_logger(), "d2_costmap_converter", "Spinning up a thread for the CostmapToPolygons plugin");
+        RCLCPP_DEBUG(nh_->get_logger(), "Spinning up a thread for the CostmapToPolygons plugin");
         need_to_terminate_ = false;
         
         worker_timer_ = nh_->create_wall_timer(
                     rate->period(),
                     std::bind(&BaseCostmapToPolygons::workerCallback, this));
-        spin_thread_ = new std::thread(std::bind(&BaseCostmapToPolygons::spinThread, this));
+        spin_thread_ = std::make_unique<std::thread>(std::bind(&BaseCostmapToPolygons::spinThread, this));
       }
       else
       {
         worker_timer_ = nh_->create_wall_timer(
                     rate->period(),
                     std::bind(&BaseCostmapToPolygons::workerCallback, this));
-        spin_thread_ = nullptr;
+        spin_thread_.reset();
       }
     }
     
@@ -224,7 +224,7 @@ public:
           need_to_terminate_ = true;
         }
         spin_thread_->join();
-        delete spin_thread_;
+        spin_thread_.reset();
       }
     }
 
@@ -275,7 +275,7 @@ protected:
 private:
   rclcpp::TimerBase::SharedPtr worker_timer_;
   rclcpp::Node::SharedPtr nh_;
-  std::thread* spin_thread_;
+  std::unique_ptr<std::thread> spin_thread_;
   std::mutex terminate_mutex_;
   bool need_to_terminate_;
 };    
@@ -310,7 +310,7 @@ public:
 //      std::string raw_plugin_name = static_converter_loader_.getName(plugin_name);
       static_costmap_converter_->initialize(nh_parent);
       setStaticCostmapConverterPlugin(static_costmap_converter_);
-      RCLCPP_INFO(getLogger(), "CostmapToDynamicObstacles: underlying costmap conversion plugin for static obstacles %s loaded.", plugin_name);
+      RCLCPP_INFO(getLogger(), "CostmapToDynamicObstacles: underlying costmap conversion plugin for static obstacles %s loaded.", plugin_name.c_str());
     }
     catch(const pluginlib::PluginlibException& ex)
     {
