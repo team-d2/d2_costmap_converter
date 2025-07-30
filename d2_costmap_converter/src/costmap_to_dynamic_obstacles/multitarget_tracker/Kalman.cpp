@@ -14,7 +14,8 @@ TKalmanFilter::TKalmanFilter(Point_t pt, track_t deltatime)
   dt = deltatime;
 
   // 6 state variables [x y z xdot ydot zdot], 3 measurements [x y z]
-  kalman = new cv::KalmanFilter(6, 3, 0);
+  // kalman = new cv::KalmanFilter(6, 3, 0);
+  kalman = std::make_unique<cv::KalmanFilter>(6, 3, 0);
   // Transition cv::Matrix
   kalman->transitionMatrix = (cv::Mat_<track_t>(6, 6) <<
                               1, 0, 0, dt,  0,  0,
@@ -60,7 +61,10 @@ TKalmanFilter::TKalmanFilter(Point_t pt, track_t deltatime)
   cv::setIdentity(kalman->errorCovPost, cv::Scalar::all(1000000));
 }
 //---------------------------------------------------------------------------
-TKalmanFilter::~TKalmanFilter() { delete kalman; }
+TKalmanFilter::~TKalmanFilter() { 
+  // delete kalman; // smart pointerに変更
+  kalman.reset();
+}
 
 //---------------------------------------------------------------------------
 void TKalmanFilter::Prediction()

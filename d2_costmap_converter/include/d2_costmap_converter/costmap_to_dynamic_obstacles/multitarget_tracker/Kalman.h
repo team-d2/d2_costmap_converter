@@ -13,7 +13,8 @@ public:
   ~TKalmanFilter();
   void Prediction();
   Point_t Update(Point_t p, bool DataCorrect);
-  cv::KalmanFilter* kalman;
+  // cv::KalmanFilter* kalman;
+  std::unique_ptr<cv::KalmanFilter> kalman; // Use smart pointer to manage memory automatically
   track_t dt;
   Point_t LastPosition; // contour in [px]
   Point_t LastVelocity; // velocity in [px/s]
