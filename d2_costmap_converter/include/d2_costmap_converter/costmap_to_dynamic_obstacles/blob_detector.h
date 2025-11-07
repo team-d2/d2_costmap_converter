@@ -93,8 +93,8 @@ public:
   void updateParameters(const cv::SimpleBlobDetector::Params& parameters);
 
   // Override pure virtual functions from cv::SimpleBlobDetector
-  virtual void setParams(const cv::SimpleBlobDetector::Params& params) override;
-  virtual cv::SimpleBlobDetector::Params getParams() const override;
+  virtual void setParams(const cv::SimpleBlobDetector::Params& params);
+  virtual cv::SimpleBlobDetector::Params getParams() const;
 
 
 protected:
