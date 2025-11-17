@@ -1,0 +1,4 @@
+#include "d2_costmap_polygon_generator/costmap_polygon_generator_node.hpp"
+#include "rclcpp_components/register_node_macro.hpp"
+
+RCLCPP_COMPONENTS_REGISTER_NODE(d2::costmap_polygon_generator::CostMapPolygonGeneratorNode)

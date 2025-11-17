@@ -1,0 +1,60 @@
+<launch>
+  <!-- args -->
+  <arg name="namespace" default=""/>
+  <arg name="params_file" default="$(find-pkg-share d2_costmap_bringup)/config/d2_costmap.param.yaml"/>
+  <arg name="use_sim_time" default="false"/>
+
+  <arg name="costmap_name" default="/costmap"/>
+  <arg name="costmap_file_name"/>
+  <arg name="lidar_points_topic_name" default="/lidar/points"/>
+  <arg name="pose_topic_name" default="/pose"/>
+  <arg name="obstacle_array_topic_name" default="/obstacle_array"/>
+  <arg name="obstacle_array_marker_topic_name" default="/obstacle_array/marker"/>
+
+  <!-- global parameters -->
+  <set_parameter name="use_sim_time" value="$(var use_sim_time)"/>
+
+  <!-- nodes -->
+  <node pkg="point_cloud_clopper_ros2" exec="point_cloud_box_clopper_node"
+    namespace="$(var namespace)$(var costmap_name)" output="screen">
+    <param from="$(var params_file)" allow_substs="true"/>
+    <remap from="points" to="$(var lidar_points_topic_name)"/>
+    <remap from="points_clopped" to="lidar/points_clopped"/>
+  </node>
+  <node pkg="geometry_transformer" exec="point_cloud_transformer_node"
+    namespace="$(var namespace)$(var costmap_name)" output="screen">
+    <param from="$(var params_file)" allow_substs="true"/>
+    <remap from="points" to="lidar/points_clopped"/>
+    <remap from="points/transformed" to="lidar/points_clopped/transformed"/>
+  </node>
+  <node pkg="nav2_map_server" exec="map_server"
+    namespace="$(var namespace)$(var costmap_name)" output="screen">
+    <param from="$(var params_file)" allow_substs="true"/>
+    <param name="yaml_filename" value="$(var costmap_file_name)"/>
+    <remap from="map" to="costmap"/>
+  </node>
+  <node pkg="d2_costmap_clipper" exec="costmap_clipper_node"
+    namespace="$(var namespace)$(var costmap_name)" output="screen">
+    <param from="$(var params_file)" allow_substs="true"/>
+    <remap from="robot_pose" to="$(var pose_topic_name)"/>
+  </node>
+  <node pkg="d2_costmap_obstacle_merger" exec="costmap_obstacle_merger_node"
+    namespace="$(var namespace)$(var costmap_name)" output="screen">
+    <param from="$(var params_file)" allow_substs="true"/>
+    <remap from="costmap" to="costmap_clipped"/>
+    <remap from="lidar/points" to="lidar/points_clopped/transformed"/>
+    <remap from="costmap_with_obstacle" to="costmap_clipped_with_obstacle"/>
+  </node>
+  <node pkg="d2_costmap_polygon_generator" exec="costmap_polygon_generator_node"
+    namespace="$(var namespace)$(var costmap_name)" output="screen">
+    <param from="$(var params_file)" allow_substs="true"/>
+    <remap from="costmap" to="costmap_clipped_with_obstacle"/>
+    <remap from="obstacle_array" to="$(var obstacle_array_topic_name)"/>
+  </node>
+  <node pkg="d2_obstacle_viewer" exec="obstacle_viewer_node"
+    namespace="$(var namespace)$(var costmap_name)" output="screen">
+    <param from="$(var params_file)" allow_substs="true"/>
+    <remap from="obstacle_array" to="$(var obstacle_array_topic_name)"/>
+    <remap from="obstacle_array/marker" to="$(var obstacle_array_marker_topic_name)"/>
+  </node>
+</launch>

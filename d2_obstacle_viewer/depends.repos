@@ -1,0 +1,5 @@
+repositories:
+  geometry_tranformer:
+    type: git
+    url: https://github.com/team-d2/geometry_transformer.git
+    version: 0bab64fd6b501912153788b642acca284ebd9b88
