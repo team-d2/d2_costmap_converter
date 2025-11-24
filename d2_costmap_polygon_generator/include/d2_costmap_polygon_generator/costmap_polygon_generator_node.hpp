@@ -18,6 +18,8 @@ class CostMapPolygonGeneratorNode : public rclcpp::Node
 {
   using ObstacleArrayMsg = d2_costmap_converter_msgs::msg::ObstacleArrayMsg;
   using OccupancyGridMsg = nav_msgs::msg::OccupancyGrid;
+  using PolygonMsg = geometry_msgs::msg::Polygon;
+  using Point32Msg = geometry_msgs::msg::Point32;
   
 public:
   static constexpr auto kDefaultNodeName = "costmap_polygon_generator";
@@ -28,6 +30,8 @@ public:
     const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
   : rclcpp::Node(node_name, node_namespace, options),
     map_cost_threshold_(this->declare_parameter("map.obstacle.cost_threshold", 50)),
+    expansion_allowance_(this->declare_parameter("map.obstacle.expansion_allowance", 0.5)),
+    shrinkage_allowance_(this->declare_parameter("map.obstacle.shrinkage_allowance", 0.0)),
     obstacle_array_publisher_(this->obstacle_array_publisher()),
     costmap_subscription_(this->create_costmap_subscription())
   {
@@ -58,6 +62,63 @@ private:
       p2.x * (p3.y - p1.y) +
       p3.x * (p1.y - p2.y);
     return area == 0;
+  }
+
+  static inline Point32Msg to_point32_msg_data(const cv::Point2i& point)
+  {
+    Point32Msg point_msg_data;
+    point_msg_data.x = static_cast<float>(point.x);
+    point_msg_data.y = static_cast<float>(point.y);
+    point_msg_data.z = 0.0f;
+    return point_msg_data;
+  }
+
+  PolygonMsg contour_to_polygon_msg_data(const std::vector<cv::Point2i>& contours)
+  {
+    if (contours.size() < 3) {
+      PolygonMsg polygon_msg_data;
+      for (const auto& contour : contours) {
+        polygon_msg_data.points.emplace_back(to_point32_msg_data(contour));
+      }
+      return polygon_msg_data;
+    }
+
+    PolygonMsg polygon_msg_data;
+    polygon_msg_data.points.reserve(contours.size());
+    polygon_msg_data.points.emplace_back(to_point32_msg_data(contours.front()));
+    auto contour_itr = std::next(contours.begin());
+    std::vector<cv::Point2i> middle_contours;
+    auto is_line = [&middle_contours, this](const cv::Point2i& p1, const cv::Point2i& p2)
+    {
+      const auto p_diff_x = p2.x - p1.x;
+      const auto p_diff_y = p2.y - p1.y;
+      const auto p_difff_norm = std::sqrt(p_diff_x * p_diff_x + p_diff_y * p_diff_y);
+      const auto det_min = this->shrinkage_allowance_ * p_difff_norm;
+      const auto det_max = this->expansion_allowance_ * p_difff_norm;
+      for (const auto& mid_pt : middle_contours) {
+        const auto det = p_diff_x * (mid_pt.y - p1.y) - p_diff_y * (mid_pt.x - p1.x);
+        if (det < det_min || det_max < det) {
+          return false;
+        }
+      }
+      return true;
+    };
+    auto last_point = contours.front();
+    for (; contour_itr != contours.end(); ++contour_itr) {
+      if (is_line(last_point, *contour_itr)) {
+        middle_contours.push_back(*contour_itr);
+      }
+      else {
+        last_point = middle_contours.back();
+        polygon_msg_data.points.emplace_back(to_point32_msg_data(last_point));
+        middle_contours.clear();
+      }
+    }
+    if (!is_line(last_point, contours.front())) {
+      polygon_msg_data.points.emplace_back(to_point32_msg_data(contours.back()));
+    }
+    polygon_msg_data.points.emplace_back(to_point32_msg_data(contours.front()));
+    return polygon_msg_data;
   }
 
   rclcpp::Publisher<ObstacleArrayMsg>::SharedPtr obstacle_array_publisher()
@@ -126,46 +187,12 @@ private:
       costmap_msg->info.origin.orientation.z);
     map_origin.linear() = q.toRotationMatrix();
 
-    const auto to_point32_msg_data = [&](cv::Point2i point)
-    {
-      Eigen::Vector3d relative_point(
-        point.x * costmap_msg->info.resolution,
-        point.y * costmap_msg->info.resolution, 0.0);
-      Eigen::Vector3d point_eigen = map_origin * relative_point;
-      geometry_msgs::msg::Point32 point_msg_data;
-      point_msg_data.x = point_eigen.x();
-      point_msg_data.y = point_eigen.y();
-      point_msg_data.z = point_eigen.z();
-      return point_msg_data;
-    };
-
     std::size_t obstacle_id = 0;
     for (const auto& contour : contours) {
       d2_costmap_converter_msgs::msg::ObstacleMsg obstacle_msg_data;
       obstacle_msg_data.header = costmap_msg->header;
       obstacle_msg_data.id = obstacle_id;
-      if (contour.size() < 3) {
-        for (const auto& piccel : contour) {
-          const auto point_msg_data = to_point32_msg_data(piccel);
-          obstacle_msg_data.polygon.points.push_back(point_msg_data);
-        }
-      }
-      else {
-        if (!is_line(contour.back(), contour[0], contour[1])) {
-          const auto point_msg_data = to_point32_msg_data(contour[0]);
-          obstacle_msg_data.polygon.points.push_back(point_msg_data);
-        }
-        for (size_t i = 1; i < contour.size() - 1; ++i) {
-          if (!is_line(contour[i - 1], contour[i], contour[i + 1])) {
-            const auto point_msg_data = to_point32_msg_data(contour[i]);
-            obstacle_msg_data.polygon.points.push_back(point_msg_data);
-          }
-        }
-        if (!is_line(contour[contour.size() - 2], contour.back(), contour[0])) {
-          const auto point_msg_data = to_point32_msg_data(contour.back());
-          obstacle_msg_data.polygon.points.push_back(point_msg_data);
-        }
-      }
+      obstacle_msg_data.polygon = contour_to_polygon_msg_data(contour);
       obstacle_array_msg->obstacles.push_back(obstacle_msg_data);
       ++obstacle_id;
     }
@@ -193,6 +220,7 @@ private:
   }
 
   std::int_fast8_t map_cost_threshold_;
+  double expansion_allowance_, shrinkage_allowance_;
 
   rclcpp::Publisher<ObstacleArrayMsg>::SharedPtr obstacle_array_publisher_;
 
