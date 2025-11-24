@@ -14,5 +14,7 @@
       x_max: .inf
       y_min: -.inf
       y_max: .inf
-      z_min: -0.2
+      z_min: -0.5
       z_max: 0.5
+    clip_cell_width: 100
+    qos_overrides./livox_points.subscription.reliability: best_effort

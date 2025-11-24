@@ -6,10 +6,10 @@
 
   <arg name="costmap_name" default="/costmap"/>
   <arg name="costmap_file_name"/>
-  <arg name="lidar_points_topic_name" default="/lidar/points"/>
+  <arg name="lidar_points_topic_name" default="/livox_points"/>
   <arg name="pose_topic_name" default="/pose"/>
-  <arg name="obstacle_array_topic_name" default="/obstacle_array"/>
-  <arg name="obstacle_array_marker_topic_name" default="/obstacle_array/marker"/>
+  <arg name="obstacle_array_topic_name" default="/obstacles"/>
+  <arg name="obstacle_array_marker_topic_name" default="/obstacle_markers"/>
 
   <!-- global parameters -->
   <set_parameter name="use_sim_time" value="$(var use_sim_time)"/>
@@ -32,6 +32,12 @@
     <param from="$(var params_file)" allow_substs="true"/>
     <param name="yaml_filename" value="$(var costmap_file_name)"/>
     <remap from="map" to="costmap"/>
+  </node>
+  <node pkg="nav2_lifecycle_manager" exec="lifecycle_manager"
+    namespace="$(var namespace)$(var costmap_name)"
+    name="lifecycle_manager_map" output="screen">
+    <param name="autostart" value="true" />
+    <param name="node_names" value="['map_server']" />
   </node>
   <node pkg="d2_costmap_clipper" exec="costmap_clipper_node"
     namespace="$(var namespace)$(var costmap_name)" output="screen">
