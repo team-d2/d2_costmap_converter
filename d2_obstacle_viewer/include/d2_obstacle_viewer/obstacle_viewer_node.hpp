@@ -87,6 +87,9 @@ private:
     auto marker_array_msg = std::make_unique<MarkerArrayMsg>();
     marker_array_msg->markers.reserve(obstacle_array_msg->obstacles.size());
 
+    MarkerMsg delete_marker_msg;
+    delete_marker_msg.action = MarkerMsg::DELETEALL;
+    marker_array_msg->markers.push_back(delete_marker_msg);
     for (const auto &obstacle_msg_data : obstacle_array_msg->obstacles) {
       marker_array_msg->markers.emplace_back(to_marker_msg_data(obstacle_msg_data));
     }
