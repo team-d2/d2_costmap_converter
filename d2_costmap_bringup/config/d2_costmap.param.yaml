@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    inside_remove_boxes: ["lidar_min_box"]
+    inside_remove_boxes: ["lidar_min_box", "controller_human_box"]
     outside_remove_boxes: ["lidar_max_box"]
     lidar_min_box:
       x_min: -0.65
@@ -16,5 +16,30 @@
       y_max: .inf
       z_min: -0.5
       z_max: 0.5
+    controller_human_box:
+      x_min: -2.0
+      x_max: -0.65
+      y_min: -0.5
+      y_max: 0.5
+      z_min: -1.0
+      z_max: 1.0
     clip_cell_width: 100
-    qos_overrides./livox_points.subscription.reliability: best_effort
+    lidar.point.radius: 0.8
+    map.obstacle.cost: 20
+    map.obstacle.cost_threshold: 100
+    map.obstacle.expansion_allowance: 0.8
+    map.obstacle.shrinkage_allowance: 0.1
+    qos_overrides:
+      /livox_points:
+        subscription:
+          reliability: best_effort
+      /costmap/lidar/points_clopped:
+        publisher:
+          reliability: best_effort
+        subscription:
+          reliability: best_effort
+      /costmap/lidar/points_clopped/transformed:
+        publisher:
+          reliability: best_effort
+        subscription:
+          reliability: best_effort
