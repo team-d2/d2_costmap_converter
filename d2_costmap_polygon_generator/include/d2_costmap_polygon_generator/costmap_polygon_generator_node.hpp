@@ -55,37 +55,18 @@ public:
   ~CostMapPolygonGeneratorNode() override {}
 
 private:
-  static inline bool is_line(const cv::Point2i& p1, const cv::Point2i& p2, const cv::Point2i& p3)
+  std::vector<Eigen::Vector2d> contour_to_polygon(const std::vector<cv::Point2i>& contours)
   {
-    double area = 
-      p1.x * (p2.y - p3.y) +
-      p2.x * (p3.y - p1.y) +
-      p3.x * (p1.y - p2.y);
-    return area == 0;
-  }
-
-  static inline Point32Msg to_point32_msg_data(const cv::Point2i& point)
-  {
-    Point32Msg point_msg_data;
-    point_msg_data.x = static_cast<float>(point.x);
-    point_msg_data.y = static_cast<float>(point.y);
-    point_msg_data.z = 0.0f;
-    return point_msg_data;
-  }
-
-  PolygonMsg contour_to_polygon_msg_data(const std::vector<cv::Point2i>& contours)
-  {
+    std::vector<Eigen::Vector2d> polygon;
     if (contours.size() < 3) {
-      PolygonMsg polygon_msg_data;
-      for (const auto& contour : contours) {
-        polygon_msg_data.points.emplace_back(to_point32_msg_data(contour));
+      for (const auto& pt : contours) {
+        polygon.emplace_back(pt.x, pt.y);
       }
-      return polygon_msg_data;
+      return polygon;
     }
 
-    PolygonMsg polygon_msg_data;
-    polygon_msg_data.points.reserve(contours.size());
-    polygon_msg_data.points.emplace_back(to_point32_msg_data(contours.front()));
+    polygon.reserve(contours.size());
+    polygon.emplace_back(contours.front().x, contours.front().y);
     auto contour_itr = std::next(contours.begin());
     std::vector<cv::Point2i> middle_contours;
     auto is_line = [&middle_contours, this](const cv::Point2i& p1, const cv::Point2i& p2)
@@ -93,8 +74,8 @@ private:
       const auto p_diff_x = p2.x - p1.x;
       const auto p_diff_y = p2.y - p1.y;
       const auto p_difff_norm = std::sqrt(p_diff_x * p_diff_x + p_diff_y * p_diff_y);
-      const auto det_min = this->shrinkage_allowance_ * p_difff_norm;
-      const auto det_max = this->expansion_allowance_ * p_difff_norm;
+      const auto det_min = -this->expansion_allowance_ * p_difff_norm;
+      const auto det_max = +this->shrinkage_allowance_ * p_difff_norm;
       for (const auto& mid_pt : middle_contours) {
         const auto det = p_diff_x * (mid_pt.y - p1.y) - p_diff_y * (mid_pt.x - p1.x);
         if (det < det_min || det_max < det) {
@@ -105,20 +86,18 @@ private:
     };
     auto last_point = contours.front();
     for (; contour_itr != contours.end(); ++contour_itr) {
-      if (is_line(last_point, *contour_itr)) {
-        middle_contours.push_back(*contour_itr);
-      }
-      else {
+      if (!is_line(last_point, *contour_itr)) {
         last_point = middle_contours.back();
-        polygon_msg_data.points.emplace_back(to_point32_msg_data(last_point));
+        polygon.emplace_back(last_point.x, last_point.y);
         middle_contours.clear();
       }
+      middle_contours.push_back(*contour_itr);
     }
     if (!is_line(last_point, contours.front())) {
-      polygon_msg_data.points.emplace_back(to_point32_msg_data(contours.back()));
+      polygon.emplace_back(contours.back().x, contours.back().y);
     }
-    polygon_msg_data.points.emplace_back(to_point32_msg_data(contours.front()));
-    return polygon_msg_data;
+    polygon.emplace_back(contours.front().x, contours.front().y);
+    return polygon;
   }
 
   rclcpp::Publisher<ObstacleArrayMsg>::SharedPtr obstacle_array_publisher()
@@ -192,7 +171,19 @@ private:
       d2_costmap_converter_msgs::msg::ObstacleMsg obstacle_msg_data;
       obstacle_msg_data.header = costmap_msg->header;
       obstacle_msg_data.id = obstacle_id;
-      obstacle_msg_data.polygon = contour_to_polygon_msg_data(contour);
+      const auto polygon = contour_to_polygon(contour);
+      obstacle_msg_data.polygon.points.reserve(polygon.size());
+      for (const auto & point : polygon) {
+        Eigen::Vector3d map_point = map_origin * Eigen::Vector3d(
+          point.x() * costmap_msg->info.resolution,
+          point.y() * costmap_msg->info.resolution,
+          0.0);
+        Point32Msg point_msg;
+        point_msg.x = static_cast<float>(map_point.x());
+        point_msg.y = static_cast<float>(map_point.y());
+        point_msg.z = static_cast<float>(map_point.z());
+        obstacle_msg_data.polygon.points.push_back(point_msg);
+      }
       obstacle_array_msg->obstacles.push_back(obstacle_msg_data);
       ++obstacle_id;
     }
