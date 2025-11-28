@@ -90,6 +90,13 @@ private:
 
   void set_map_msg(OccupancyGridMsg::ConstSharedPtr costmap_msg)
   {
+    if (costmap_msg->info.resolution <= 0.0)
+    {
+      RCLCPP_WARN_THROTTLE(
+        this->get_logger(), *this->get_clock(), 5000,
+        "Costmap resolution is invalid: %f", costmap_msg->info.resolution);
+      return;
+    }
     frame_id_ = costmap_msg->header.frame_id;
     map_load_time_ = costmap_msg->info.map_load_time;
     map_resolution_ = costmap_msg->info.resolution;
@@ -140,22 +147,29 @@ private:
     int costmap_clipped_centor_index_y = std::round(on_map_position.y() / map_resolution_);
 
     int costmap_clipped_min_index_x = 
-      std::max(0, costmap_clipped_centor_index_x - clip_cell_width_);
+      std::clamp(costmap_clipped_centor_index_x - clip_cell_width_, 0, static_cast<int>(map_.cols()));
     int costmap_clipped_min_index_y = 
-      std::max(0, costmap_clipped_centor_index_y - clip_cell_width_);
+      std::clamp(costmap_clipped_centor_index_y - clip_cell_width_, 0, static_cast<int>(map_.rows()));
     
     int costmap_clipped_max_index_x = 
-      std::min(static_cast<int>(map_.cols()), costmap_clipped_centor_index_x + clip_cell_width_);
+      std::clamp(costmap_clipped_centor_index_x + clip_cell_width_, 0, static_cast<int>(map_.cols()));
     int costmap_clipped_max_index_y =
-      std::min(static_cast<int>(map_.rows()), costmap_clipped_centor_index_y + clip_cell_width_);
+      std::clamp(costmap_clipped_centor_index_y + clip_cell_width_, 0, static_cast<int>(map_.rows()));
 
     auto costmap_clipped_msg = std::make_unique<OccupancyGridMsg>();
     costmap_clipped_msg->header = pose_msg->header;
+    costmap_clipped_msg->info.width = costmap_clipped_max_index_x - costmap_clipped_min_index_x;
+    costmap_clipped_msg->info.height = costmap_clipped_max_index_y - costmap_clipped_min_index_y;
+    if (costmap_clipped_msg->info.width == 0 || costmap_clipped_msg->info.height == 0)
+    {
+      RCLCPP_WARN_THROTTLE(
+        this->get_logger(), *this->get_clock(), 5000,
+        "pose is out of costmap range");
+      return;
+    }
 
     costmap_clipped_msg->info.map_load_time = map_load_time_;
     costmap_clipped_msg->info.resolution = map_resolution_;
-    costmap_clipped_msg->info.width = costmap_clipped_max_index_x - costmap_clipped_min_index_x;
-    costmap_clipped_msg->info.height = costmap_clipped_max_index_y - costmap_clipped_min_index_y;
     costmap_clipped_msg->info.origin.position.x = 
       map_origin_.translation().x() + costmap_clipped_min_index_x * map_resolution_;
     costmap_clipped_msg->info.origin.position.y =
