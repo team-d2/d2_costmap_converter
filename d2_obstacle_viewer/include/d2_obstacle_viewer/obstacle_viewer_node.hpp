@@ -1,6 +1,8 @@
 #ifndef D2__OBSTACLE_VIEWER__OBSTACLE_VIEWER_NODE_HPP_
 #define D2__OBSTACLE_VIEWER__OBSTACLE_VIEWER_NODE_HPP_
 
+#include <cstdint>
+#include <set>
 
 #include "visualization_msgs/msg/marker_array.hpp"
 #include "d2_costmap_converter_msgs/msg/obstacle_array_msg.hpp"
@@ -87,14 +89,20 @@ private:
     auto marker_array_msg = std::make_unique<MarkerArrayMsg>();
     marker_array_msg->markers.reserve(obstacle_array_msg->obstacles.size());
 
-    MarkerMsg delete_marker_msg;
-    delete_marker_msg.action = MarkerMsg::DELETEALL;
-    marker_array_msg->markers.push_back(delete_marker_msg);
+    std::unordered_set<std::uint32_t> current_marker_ids;
     for (const auto &obstacle_msg_data : obstacle_array_msg->obstacles) {
+      current_marker_ids.insert(obstacle_msg_data.id);
       marker_array_msg->markers.emplace_back(to_marker_msg_data(obstacle_msg_data));
+    }
+    for (const auto & last_id : last_marker_ids_) {
+      if (current_marker_ids.find(last_id) != current_marker_ids.end()) {
+        continue;
+      }
+      marker_array_msg->markers.emplace_back(to_marker_delete_msg_data(last_id));
     }
 
     obstacle_array_marker_publisher_->publish(std::move(marker_array_msg));
+    last_marker_ids_.merge(current_marker_ids);
   }
 
   MarkerMsg to_marker_msg_data(const ObstacleMsg & obstacle_msg_data) const
@@ -124,9 +132,19 @@ private:
     return marker_msg_data;
   }
 
+  MarkerMsg to_marker_delete_msg_data(std::uint32_t id)
+  {
+    MarkerMsg delete_marker_msg;
+    delete_marker_msg.action = MarkerMsg::DELETE;
+    delete_marker_msg.ns = marker_ns_;
+    delete_marker_msg.id = id;
+    return delete_marker_msg;
+  };
+
   std::string marker_ns_;
   double line_width_;
   double color_r_, color_g_, color_b_, color_a_;
+  std::unordered_set<std::uint32_t> last_marker_ids_;
 
   rclcpp::Publisher<MarkerArrayMsg>::SharedPtr obstacle_array_marker_publisher_;
   rclcpp::Subscription<ObstacleArrayMsg>::SharedPtr pose_subscription_;
