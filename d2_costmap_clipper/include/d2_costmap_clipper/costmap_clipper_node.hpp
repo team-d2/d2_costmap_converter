@@ -147,14 +147,14 @@ private:
     int costmap_clipped_centor_index_y = std::round(on_map_position.y() / map_resolution_);
 
     int costmap_clipped_min_index_x = 
-      std::clamp(costmap_clipped_centor_index_x - clip_cell_width_, 0, static_cast<int>(map_.cols()));
+      std::clamp(costmap_clipped_centor_index_x - clip_cell_width_, 0, static_cast<int>(map_.rows()));
     int costmap_clipped_min_index_y = 
-      std::clamp(costmap_clipped_centor_index_y - clip_cell_width_, 0, static_cast<int>(map_.rows()));
+      std::clamp(costmap_clipped_centor_index_y - clip_cell_width_, 0, static_cast<int>(map_.cols()));
     
     int costmap_clipped_max_index_x = 
-      std::clamp(costmap_clipped_centor_index_x + clip_cell_width_, 0, static_cast<int>(map_.cols()));
+      std::clamp(costmap_clipped_centor_index_x + clip_cell_width_, 0, static_cast<int>(map_.rows()));
     int costmap_clipped_max_index_y =
-      std::clamp(costmap_clipped_centor_index_y + clip_cell_width_, 0, static_cast<int>(map_.rows()));
+      std::clamp(costmap_clipped_centor_index_y + clip_cell_width_, 0, static_cast<int>(map_.cols()));
 
     auto costmap_clipped_msg = std::make_unique<OccupancyGridMsg>();
     costmap_clipped_msg->header = pose_msg->header;
