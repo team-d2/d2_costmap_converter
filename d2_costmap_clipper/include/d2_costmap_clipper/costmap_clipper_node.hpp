@@ -30,6 +30,8 @@ public:
     blocking_distance_(this->declare_parameter("blocking.distance", 0.0)),
     blocking_width_(this->declare_parameter("blocking.width", 0.0)),
     blocking_cost_(this->declare_parameter("blocking.cost", 100)),
+    enable_side_blocking_(this->declare_parameter("blocking.enable_side_blocking", false)),
+    side_blocking_offset_(this->declare_parameter("blocking.side_blocking_offset", 0.1)),
     clipped_costmap_publisher_(this->create_clipped_costmap_publisher()),
     pose_subscription_(this->create_pose_subscription()),
     costmap_subscription_(this->create_costmap_subscription())
@@ -224,6 +226,11 @@ private:
               (blocking_width_ == std::numeric_limits<double>::infinity() || std::abs(p_robot.y()) <= blocking_width_ / 2.0)) {
             clipped_map(i, j) = static_cast<std::int8_t>(blocking_cost_);
           }
+          if (enable_side_blocking_) {
+            if (std::abs(p_robot.y()) > (costmap_clipped_msg->info.width * map_resolution_ / 2.0 - side_blocking_offset_)) {
+              clipped_map(i, j) = static_cast<std::int8_t>(blocking_cost_);
+            }
+          }
         }
       }
     }
@@ -235,6 +242,8 @@ private:
   double blocking_distance_;
   double blocking_width_;
   int blocking_cost_;
+  bool enable_side_blocking_;
+  double side_blocking_offset_;
 
   std::string frame_id_;
   rclcpp::Time map_load_time_;

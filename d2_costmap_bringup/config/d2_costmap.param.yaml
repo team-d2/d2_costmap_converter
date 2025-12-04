@@ -28,6 +28,8 @@
       distance: 2.0
       width: .inf
       cost: 100
+      enable_side_blocking: true
+      side_blocking_offset: 0.1
     lidar.point.radius: 0.8
     map.obstacle.cost: 20
     map.obstacle.cost_threshold: 100
