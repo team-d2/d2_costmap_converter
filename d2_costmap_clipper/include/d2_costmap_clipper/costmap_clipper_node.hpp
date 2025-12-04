@@ -6,6 +6,7 @@
 #include "nav_msgs/msg/occupancy_grid.hpp"
 #include "rclcpp/node.hpp"
 #include "Eigen/Dense"
+#include <limits> // Required for std::numeric_limits
 
 #include "d2_costmap_clipper/visibility.hpp"
 
@@ -26,6 +27,9 @@ public:
     const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
   : rclcpp::Node(node_name, node_namespace, options),
     clip_cell_width_(this->declare_parameter("clip_cell_width", 10)),
+    blocking_distance_(this->declare_parameter("blocking.distance", 0.0)),
+    blocking_width_(this->declare_parameter("blocking.width", 0.0)),
+    blocking_cost_(this->declare_parameter("blocking.cost", 100)),
     clipped_costmap_publisher_(this->create_clipped_costmap_publisher()),
     pose_subscription_(this->create_pose_subscription()),
     costmap_subscription_(this->create_costmap_subscription())
@@ -195,10 +199,42 @@ private:
       costmap_clipped_msg->info.width,
       costmap_clipped_msg->info.height);
     
+    if (blocking_width_ > 0.0) {
+      Eigen::Quaterniond robot_q(
+        pose_msg->pose.pose.orientation.w,
+        pose_msg->pose.pose.orientation.x,
+        pose_msg->pose.pose.orientation.y,
+        pose_msg->pose.pose.orientation.z);
+      Eigen::Isometry3d robot_pose = Eigen::Isometry3d::Identity();
+      robot_pose.translation() = position;
+      robot_pose.linear() = robot_q.toRotationMatrix();
+      Eigen::Isometry3d robot_pose_inv = robot_pose.inverse();
+      
+      double clipped_origin_x = costmap_clipped_msg->info.origin.position.x;
+      double clipped_origin_y = costmap_clipped_msg->info.origin.position.y;
+      double clipped_origin_z = costmap_clipped_msg->info.origin.position.z;
+
+      for (int i = 0; i < static_cast<int>(costmap_clipped_msg->info.width); ++i) {
+        for (int j = 0; j < static_cast<int>(costmap_clipped_msg->info.height); ++j) {
+          double px = clipped_origin_x + (i + 0.5) * map_resolution_;
+          double py = clipped_origin_y + (j + 0.5) * map_resolution_;
+          Eigen::Vector3d p_global(px, py, clipped_origin_z);
+          Eigen::Vector3d p_robot = robot_pose_inv * p_global;
+          if (p_robot.x() < -blocking_distance_ && 
+              (blocking_width_ == std::numeric_limits<double>::infinity() || std::abs(p_robot.y()) <= blocking_width_ / 2.0)) {
+            clipped_map(i, j) = static_cast<std::int8_t>(blocking_cost_);
+          }
+        }
+      }
+    }
+
     clipped_costmap_publisher_->publish(std::move(costmap_clipped_msg));
   }
 
   int clip_cell_width_;
+  double blocking_distance_;
+  double blocking_width_;
+  int blocking_cost_;
 
   std::string frame_id_;
   rclcpp::Time map_load_time_;
